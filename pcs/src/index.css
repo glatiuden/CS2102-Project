@@ -1,0 +1,55 @@
+.select-style {
+  flex: 1 1;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.dataTables_wrapper .rdt_TableCell {
+  font-size: 14px;
+}
+
+.dataTables_wrapper .rdt_TableCol_Sortable {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.MuiGrid-grid-lg-12>div:nth-of-type(2) {
+  width: 100%;
+}
+
+.float-right {
+  float: right !important;
+}
+
+.quote {
+  background: #41ade5;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.quote:after {
+  background: inherit;
+  bottom: 0;
+  content: '';
+  display: block;
+  height: 50%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  transform: skewY(-1.5deg);
+  transform-origin: 100%;
+  z-index: -1;
+}
