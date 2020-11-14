@@ -1,4 +1,6 @@
+import { Avatar } from '@material-ui/core';
 import Badge from '@material-ui/core/Badge';
+import { yellow } from '@material-ui/core/colors';
 import { createStyles, fade, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
 
 const drawerWidth = 300;
@@ -173,6 +175,11 @@ export const useStyles = makeStyles(theme => ({
 	medAvatar: {
 		width: theme.spacing(10),
 		height: theme.spacing(10),
+	},
+	ctAvatar: {
+		width: theme.spacing(17),
+		height: theme.spacing(17),
+		textAlign: "center"
   	},
 	center: {   
 		display: 'flex',
@@ -191,7 +198,24 @@ export const useStyles = makeStyles(theme => ({
 	depositContext: {
     	flex: 1,
 	  },
-	
+	selectionInput: {
+		borderRadius: 4,
+		position: "relative",
+		border: "1px solid #ced4da",
+		fontSize: 16,
+		padding: "10px 26px 10px 12px",
+		transition: theme.transitions.create(["border-color", "box-shadow"])
+	  },
+	formControl: {
+		margin: theme.spacing(1),
+		minWidth: 120,
+	},
+	closeButton: {
+      position: 'absolute',
+      right: theme.spacing(1),
+      top: theme.spacing(1),
+      color: 'white',
+    },
 }));
 
 export const EndedBadge = withStyles((theme: Theme) =>
@@ -224,6 +248,18 @@ export const EndedBadge = withStyles((theme: Theme) =>
     }
   })
 )(Badge);
+
+export const SmallAvatar = withStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      width: 50,
+      height: 50,
+	  border: `2px solid ${theme.palette.background.paper}`,
+	  color: 'gold',
+		backgroundColor: 'white'
+    },
+  }),
+)(Avatar);
 
 export const OngoingBadge = withStyles((theme: Theme) =>
   createStyles({

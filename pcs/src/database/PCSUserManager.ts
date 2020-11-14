@@ -101,7 +101,7 @@ export async function signInUser(obj) {
 }
 
 export async function updateUser(obj) {
-    delete obj["user_role"];
+    // delete obj["user_role"];
     let result = await callFunction('update_user', obj);
     result = JSON.parse(result);
     return result.length > 0 ? result[0]["update_user"] : null;  
@@ -111,4 +111,20 @@ export async function updateUserPassword(obj) {
     let result = await callFunction('update_user_password', obj);
     result = JSON.parse(result);
     return result.length > 0 ? result[0]["update_user_password"] : null;  
+}
+
+export async function updateUserCard(obj) {
+  delete obj["cardName"]
+  delete obj["expiryDate"]
+  delete obj["ccv"]
+  let result = await callFunction('update_po_card', obj);
+  console.log(result);
+  result = JSON.parse(result);
+  return result.length > 0 ? result[0]["update_po_card"] : null;  
+}
+
+export async function getUserCard(user_email: string) {
+  let result = await callFunction('get_pet_owner_card', {user_email});
+  result = JSON.parse(result);
+  return result.length > 0 ? result[0] : null;  
 }

@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
-    AppBar, Avatar, Box, CircularProgress, Container, CssBaseline, Divider, Drawer, List, ListItem,
-    ListItemIcon, ListItemText, Toolbar, Typography
+    AppBar, Avatar, Badge, Box, CircularProgress, Container, CssBaseline, Divider, Drawer, List,
+    ListItem, ListItemIcon, ListItemText, Toolbar, Tooltip, Typography
 } from '@material-ui/core';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import AssignmentIcon from '@material-ui/icons/Assignment';
@@ -13,9 +13,16 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import PetsIcon from '@material-ui/icons/Pets';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
+import StarIcon from '@material-ui/icons/Star';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
-import { useStyles } from '../Styles';
+import AdminProfile from '../assets/AdminProfile.png';
+import CareTakerProfile from '../assets/CareTakerProfile.png';
+import PetOwnerProfile from '../assets/PetOwnerProfile.png';
+import { notifySuccess } from '../components/CareTaker/CareTakerHelper';
+import { isStarPerformer } from '../database/CareTakerManager';
+import { callNotification } from '../database/DBCaller';
+import { SmallAvatar, useStyles } from '../Styles';
 import { AppContext } from './AppContext';
 
 export interface IState {
@@ -43,8 +50,18 @@ export const MainContextProvider = (props) => {
     const history = useHistory();
     const [searchText, setSearchText] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+    const [isStar, setIsStar] = useState<boolean>(false);
     const { user, isAuthenticated, signOut } = useContext(AppContext);
-
+    const getProfilePicture = () => {
+        if (user) {
+            if (user.user_role === 'PO')
+                return PetOwnerProfile;
+            else if (user.user_role === 'ADMIN')
+                return AdminProfile;
+            else
+                return CareTakerProfile;
+        }
+    }
     const onSignOut = () => {
         signOut();
         history.push("/signin");
@@ -53,8 +70,22 @@ export const MainContextProvider = (props) => {
     useEffect(() => {
         if (!isAuthenticated) {
             history.push('/signin');
+        } else {
+            isStarPerformer(user!.email).then(result => setIsStar(result));
         }
     }, []);
+
+    useEffect(() => {
+        let interval;
+        if (user) {
+            interval = setInterval(async function () {
+                let msg = await callNotification(user.email);
+                if (msg !== "none") notifySuccess(msg);
+            }, 10000);
+        } else {
+            if (interval) clearInterval(interval);
+        }
+    }, [user]);
 
     return (
         <MainContext.Provider
@@ -87,13 +118,30 @@ export const MainContextProvider = (props) => {
                         <List>
                             <ListItem button onClick={() => history.push("/profile")}>
                                 <Container className={classes.center}>
-                                    <Avatar src={'https://source.unsplash.com/random'} className={classes.largeAvatar} />
-                                    {/* <Avatar src={'https://www.comp.nus.edu.sg/stfphotos/adi-yoga.jpg'} className={classes.largeAvatar} /> */}
+                                    {isStar ?
+                                        <>
+                                            <Badge
+                                                overlap="circle"
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'right',
+                                                }}
+                                                badgeContent={
+                                                    <Tooltip title="You are a star performer!" aria-label="add">
+                                                        <SmallAvatar>
+                                                            <StarIcon />
+                                                        </SmallAvatar>
+                                                    </Tooltip>}
+                                            >
+                                                <Avatar src={getProfilePicture()} className={classes.largeAvatar} />
+                                            </Badge>
+                                        </>
+                                        : <Avatar src={getProfilePicture()} className={classes.largeAvatar} />}
                                     <Typography variant="h6" align="center">{user ? user.name : "Sam"}</Typography>
                                     <Typography variant="caption">
-                                        {user ?.user_role === 'PO' ? "Pet_Owner" : ''}
-                                        {user ?.user_role === 'PO-FT' ? "Pet_Owner & Care Taker (Full Time)" : ''}
-                                        {user ?.user_role === 'PO-PT' ? "Pet_Owner & Care Taker (Part Time)" : ''}
+                                        {user ?.user_role === 'PO' ? "Pet Owner" : ''}
+                                        {user ?.user_role === 'PO-FT' ? "Pet Owner & Care Taker (Full Time)" : ''}
+                                        {user ?.user_role === 'PO-PT' ? "Pet Owner & Care Taker (Part Time)" : ''}
                                         {user ?.user_role === 'PT' ? "Care Taker (Part Time)" : ''}
                                         {user ?.user_role === 'FT' ? "Care Taker (Full Time)" : ''}
                                         {user ?.user_role === 'ADMIN' ? "Admin" : ''}
@@ -110,12 +158,6 @@ export const MainContextProvider = (props) => {
                                     <ListItemText primary={"Dashboard"} />
                                 </ListItem>
 
-                                <ListItem button onClick={() => history.push("/petownermanagement")}>
-                                    <ListItemIcon>
-                                        <PetsIcon className={classes.icon} />
-                                    </ListItemIcon>
-                                    <ListItemText primary={"Pet Owners Management"} />
-                                </ListItem>
 
                                 <ListItem button onClick={() => history.push("/petcategorymanagement")}>
                                     <ListItemIcon>
@@ -124,31 +166,45 @@ export const MainContextProvider = (props) => {
                                     <ListItemText primary={"Pet Category Management"} />
                                 </ListItem>
 
-                                <ListItem button onClick={() => history.push("/parttimermanagement")}>
+                                <ListItem button onClick={() => history.push("/starperformers")}>
                                     <ListItemIcon>
-                                        <ChildFriendlyIcon className={classes.icon} />
+                                        <StarIcon className={classes.icon} />
                                     </ListItemIcon>
-                                    <ListItemText primary={"Part Timer Management"} />
+                                    <ListItemText primary={"Star Performers"} />
                                 </ListItem>
 
-                                <ListItem button onClick={() => history.push("/fulltimermanagement")}>
-                                    <ListItemIcon>
-                                        <ChildFriendlyOutlinedIcon className={classes.icon} />
-                                    </ListItemIcon>
-                                    <ListItemText primary={"Full Timer Management"} />
-                                </ListItem>
-
+                                <Divider />
                                 <ListItem button onClick={() => history.push("/adminmanagement")}>
                                     <ListItemIcon>
                                         <SupervisorAccountIcon className={classes.icon} />
                                     </ListItemIcon>
                                     <ListItemText primary={"Admins Management"} />
                                 </ListItem>
+
+                                <ListItem button onClick={() => history.push("/petownermanagement")}>
+                                    <ListItemIcon>
+                                        <PetsIcon className={classes.icon} />
+                                    </ListItemIcon>
+                                    <ListItemText primary={"Pet Owners Management"} />
+                                </ListItem>
+
+                                <ListItem button onClick={() => history.push("/fulltimermanagement")}>
+                                    <ListItemIcon>
+                                        <ChildFriendlyOutlinedIcon className={classes.icon} />
+                                    </ListItemIcon>
+                                    <ListItemText primary={"Full-Timers Management"} />
+                                </ListItem>
+
+                                <ListItem button onClick={() => history.push("/parttimermanagement")}>
+                                    <ListItemIcon>
+                                        <ChildFriendlyIcon className={classes.icon} />
+                                    </ListItemIcon>
+                                    <ListItemText primary={"Part-Timers Management"} />
+                                </ListItem>
                             </Box>
                         </List>
 
                         <Box display={user ?.user_role === 'PO' || user ?.user_role === 'PO-PT' || user ?.user_role === 'PO-FT' ? "block" : "none"}>
-                            <Divider />
                             <List>
                                 <ListItem button onClick={() => history.push("/petmanagement")}>
                                     <ListItemIcon>
@@ -188,16 +244,9 @@ export const MainContextProvider = (props) => {
                                         <ListItemText primary={"Availability Management"} />
                                     </ListItem>}
                             </List>
-                            {/* <List>
-                                <ListItem button onClick={() => history.push("/caretakersalary")}>
-                                    <ListItemIcon>
-                                        <AssessmentIcon className={classes.icon} />
-                                    </ListItemIcon>
-                                    <ListItemText primary={"My Salary Report"} />
-                                </ListItem>
-                            </List> */}
                             <Divider />
                         </Box>
+                        <Divider />
 
                         <List>
                             <ListItem button>

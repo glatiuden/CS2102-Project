@@ -1,30 +1,19 @@
-import React, { useContext, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Button,
-  TextField,
-  MenuItem
-} from "@material-ui/core";
+import React, { useContext } from 'react';
 
-import { MainContext } from "../../contexts/MainContext";
-import { useStyles } from "./PetOwnerStyle";
-import { insertPetOwns } from "../../database/PetOwnsManager"
-import { AppContext } from "../../contexts/AppContext";
-import PetForm from "./PetForm.js";
+import { Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+
+import { MainContext } from '../../contexts/MainContext';
+import PetForm from './PetForm.js';
 
 const DialogAddPet = (props: any) => {
-  let { isOpen, onClose, refresh, categories } = props;
-  categories = categories.map((c) => c.category);
+  const { isOpen, onClose, refresh, categories } = props;
   const mainStyle = useContext(MainContext).classes;
-  const poStyle = useStyles();
 
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth={true}>
-      <DialogTitle className={mainStyle.dialogTitle}>Add new pet</DialogTitle>
+      <DialogTitle className={mainStyle.dialogTitle}>Add New Pet</DialogTitle>
       <DialogContent>
-        <PetForm type="Add" endForm={onClose} refresh={refresh}/>
+        <PetForm type="Add" endForm={onClose} refresh={refresh} categories={categories} />
       </DialogContent>
     </Dialog>
   );

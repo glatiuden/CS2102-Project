@@ -5,7 +5,6 @@ import {
     Button, Card, CardContent, CardHeader, CircularProgress, Divider, Grid, IconButton, TextField
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 
 import { AppContext } from '../../contexts/AppContext';
@@ -20,11 +19,13 @@ const PageCategoryManagement = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const init = () => {
         getPetCategory().then(petCats => {
-            if (petCats)
+            if (petCats) {
                 setCategories(petCats.map((val, i) => ({
                     index: i + 1,
                     category: val.category
                 })));
+                setLoading(false);
+            }
         });
     }
 
@@ -32,6 +33,7 @@ const PageCategoryManagement = () => {
     const [selectedCategory, setSelectedCategory] = useState<any>(undefined);
     const [isEdit, setIsEdit] = useState(false);
     const [dialog, setDialog] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const toggleDialog = () => {
         setDialog(!dialog);
@@ -99,24 +101,25 @@ const PageCategoryManagement = () => {
         {
             name: 'Actions',
             sortable: false,
-            cell: (row: any) => <div>
-                <Grid container alignItems="center">
-                    <IconButton onClick={onEditClick(row)} size="small">
-                        <EditIcon fontSize="inherit" />
-                    </IconButton>
-                    <Divider orientation="vertical" flexItem />
-                    <IconButton onClick={onDelete(row)} size="small">
-                        <DeleteIcon fontSize="inherit" />
-                    </IconButton>
-                </Grid>
-            </div>,
+            cell: (row: any) =>
+                <div>
+                    <Grid container alignItems="center">
+                        <IconButton onClick={onEditClick(row)} size="small">
+                            <EditIcon fontSize="inherit" />
+                        </IconButton>
+                        {/* <Divider orientation="vertical" flexItem />
+                        <IconButton onClick={onDelete(row)} size="small">
+                            <DeleteIcon fontSize="inherit" />
+                        </IconButton> */}
+                    </Grid>
+                </div>,
             ignoreRowClick: true,
             selector: 'category',
             grow: 0
         }
     ];
 
-    return categories.length > 0 ? (
+    return !loading ? (
         <Card style={{ width: "100%", padding: 10 }}>
             <Grid container spacing={1} alignItems="center">
                 <Grid item xs={8}>

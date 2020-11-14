@@ -1,4 +1,4 @@
-import { callFunction, callProcedure } from './DBCaller';
+import { callFunction } from './DBCaller';
 
 export class PetCategory {
   category: string;
@@ -17,7 +17,7 @@ export const petOwnsConverter = {
 }
 
 export async function getPetCategory() {
-    let result = await callFunction('get_pet_category', []);
+    let result = await callFunction('get_all_pet_category', []);
     return result.length > 0 ? JSON.parse(result) as PetCategory[] : null;  
 }
 

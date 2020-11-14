@@ -103,7 +103,7 @@ const Dashboard = () => {
                                 </Grid>
                                 <Grid item xs={8} md={8} lg={8}>
                                     <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                                        New Registration
+                                        NEW USERS
                                     </Typography>
                                     <Typography component="p" variant="h4">
                                         {rCount.num ? rCount.num : 0}
@@ -125,7 +125,7 @@ const Dashboard = () => {
                                 </Grid>
                                 <Grid item xs={8} md={8} lg={8}>
                                     <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                                        New Bids
+                                        NEW BIDS
                                     </Typography>
                                     <Typography component="p" variant="h4">
                                         {bCount.num ? bCount.num : 0}
@@ -147,7 +147,7 @@ const Dashboard = () => {
                                 </Grid>
                                 <Grid item xs={8} md={8} lg={8}>
                                     <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                                        Revenue
+                                        REVENUE
                                     </Typography>
                                     <Typography component="p" variant="h4">
                                         ${tRevenue.num ? tRevenue.num : 0}
@@ -168,9 +168,13 @@ const Dashboard = () => {
                                     <TrendingUpIcon style={{ fontSize: 75 }} />
                                 </Grid>
                                 <Grid item xs={8} md={8} lg={8}>
-                                    <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                                        Best Performing Month
-                                        </Typography>
+                                    <Typography
+                                        color="primary"
+                                        gutterBottom
+                                        variant="h6">
+                                        BEST MONTH
+                                </Typography>
+
                                     <Typography component="p" variant="h4">
                                         {bMonth.month}
                                     </Typography>
@@ -185,7 +189,7 @@ const Dashboard = () => {
 
                 <Grid item lg={6}>
                     <Card>
-                        <CardHeader title="Recent Orders" className={classes.center} />
+                        <CardHeader title="RECENT ORDERS" className={classes.center} />
                         <Divider />
                         <CardContent>
                             <Grid container item lg={12}>
@@ -204,7 +208,7 @@ const Dashboard = () => {
                 </Grid>
                 <Grid item lg={6}>
                     <Card>
-                        <CardHeader title="Monthly Revenue" className={classes.center} />
+                        <CardHeader title="MONTHLY REVENUE" className={classes.center} />
                         <Divider />
                         <CardContent>
                             <LineChart

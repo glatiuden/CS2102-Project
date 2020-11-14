@@ -29,3 +29,8 @@ export async function getSalaryReport(ctEmail: string, month: number) {
   result = JSON.parse(result);
   return result.length > 0 ? salaryReportConverter.fromDB(result[0]) : null;
 }
+
+export async function getAverageRatings(ctEmail: string) {
+  let result = await callFunction('get_avg_ratings', { ctEmail });
+  return parseFloat(JSON.parse(result)[0].get_avg_ratings);
+}

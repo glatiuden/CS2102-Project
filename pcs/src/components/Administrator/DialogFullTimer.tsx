@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 
 import {
-    Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, TextField, Box
+    Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, TextField
 } from '@material-ui/core';
-import {useStyles} from './AdminStyle';
+
+import { useStyles } from './AdminStyle';
 
 export default function DialogFullTimer(props: any) {
     const adminStyle = useStyles();
@@ -15,10 +16,12 @@ export default function DialogFullTimer(props: any) {
 
     return (
         <Box>
-            <Dialog open={dialogType == "Delete"} aria-labelledby="form-dialog-title">
+            <Dialog open={dialogType === "Delete"} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Delete Confirmation</DialogTitle>
                 <DialogContent dividers>
-                    Are you sure you want to delete this Full Time Care Taker named "{selectedFullTimerInfo ? selectedFullTimerInfo.name : null}"" ?
+                    Are you sure you want to delete this Full-Time Caretaker named "{selectedFullTimerInfo ? selectedFullTimerInfo.name : null}"?
+                    <br />
+                    If he/she have any accepted/confirmed jobs, it will be auto-reassigned to the next suitable full-time caretaker.
                 </DialogContent>
                 <DialogActions>
                     <Button variant="outlined" onClick={closeDialog} color="secondary">

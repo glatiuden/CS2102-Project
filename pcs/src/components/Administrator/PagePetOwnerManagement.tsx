@@ -1,35 +1,35 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 
 import {
-    Button, Card, CardContent, CardHeader, CircularProgress, Divider, Grid, IconButton, TextField
+    Card, CardContent, CardHeader, CircularProgress, Divider, Grid, IconButton, TextField
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import { filterData } from '../../database/DataFilter';
-import { 
-    PetOwner, getAllPetOwners, deletePetOwner 
-} from '../../database/PetOwnerManager';
-import { notifySuccess, notifyFailure } from './AdminHelper';
+import { deletePetOwner, getAllPetOwners, PetOwner } from '../../database/PetOwnerManager';
+import { notifyFailure, notifySuccess } from './AdminHelper';
 import DialogPetOwner from './DialogPetOwner';
-import DeleteIcon from '@material-ui/icons/Delete';
 
 const PagePetOwnerManagement = () => {
     const [ownerList, setOwnerList] = useState<PetOwner[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [dialogType, setDialogType] = useState('');
     const [selectedOwnerInfo, setSelectedOwnerInfo] = useState<any>(undefined);
+    const [loading, setLoading] = useState(true);
 
     const init = () => {
         getAllPetOwners().then((owners) => {
-            if (owners)
+            if (owners) {
                 setOwnerList(owners.map((val, i) => ({
-                    index: i + 1,
                     email: val.email,
                     name: val.name,
                     address: val.address,
+                    region: val.region,
                     reg_date: val.reg_date == null ? '' : val.reg_date.split("T")[0]
                 })));
+                setLoading(false);
+            }
         })
     }
 
@@ -37,22 +37,19 @@ const PagePetOwnerManagement = () => {
         setDialogType("");
     }
 
-    const onDeleteClick = (ownerInfo) => () =>{
+    const onDeleteClick = (ownerInfo) => () => {
         setDialogType("Delete");
         setSelectedOwnerInfo(ownerInfo);
     }
 
     const onDeleteSubmit = (ownerInfo: PetOwner) => {
-        const tempName = ownerInfo.name;
-        setOwnerList([]);
         deletePetOwner(ownerInfo).then((result) => {
-            // if(result){
-            //     notifySuccess("You have successfully deleted " + "'" + tempName + "'" + "!");
+            if (result === 1) {
+                notifySuccess("You have successfully deleted " + "'" + ownerInfo.name + "'" + "!");
                 closeDialog();
-                console.log(result);
-            // }else{                
-            //     notifyFailure("An unexpected error occured, please try again later.");
-            // }
+            } else {
+                notifyFailure("An unexpected error occured, please try again later.");
+            }
             init();
         });
     }
@@ -78,11 +75,17 @@ const PagePetOwnerManagement = () => {
             name: 'Email',
             selector: 'email',
             sortable: true,
-            grow: 1
+            grow: 1.5
         },
         {
             name: 'Home Address',
             selector: 'address',
+            sortable: true,
+            grow: 1.5
+        },
+        {
+            name: 'Region',
+            selector: 'region',
             sortable: true,
             grow: 1
         },
@@ -97,10 +100,6 @@ const PagePetOwnerManagement = () => {
             sortable: false,
             cell: (row: any) => <div>
                 <Grid container alignItems="center">
-                    {/* <IconButton onClick={onEditClick(row)} size="small">
-                        <EditIcon fontSize="inherit" />
-                    </IconButton>
-                    <Divider orientation="vertical" flexItem /> */}
                     <IconButton onClick={onDeleteClick(row)} size="small">
                         <DeleteIcon fontSize="inherit" />
                     </IconButton>
@@ -116,7 +115,7 @@ const PagePetOwnerManagement = () => {
         init();
     }, []);
 
-    return ownerList.length > 0 ? (
+    return !loading ? (
         <Card style={{ width: "100%", padding: 10 }}>
             <Grid container spacing={1} alignItems="center">
                 <Grid item xs={8}>
@@ -127,10 +126,10 @@ const PagePetOwnerManagement = () => {
             <CardContent>
                 <Grid container spacing={1}>
                     <Grid item xs={12}>
-                        <TextField 
-                            id="outlined-basic" 
-                            label="Search" 
-                            placeholder="Adi Yoga..."
+                        <TextField
+                            id="outlined-basic"
+                            label="Search"
+                            placeholder="John Tan..."
                             fullWidth
                             variant="outlined"
                             value={searchQuery}
@@ -148,7 +147,7 @@ const PagePetOwnerManagement = () => {
                             noHeader
                             defaultSortField="index"
                             pagination={true} />
-                        <DialogPetOwner 
+                        <DialogPetOwner
                             dialogType={dialogType}
                             closeDialog={closeDialog}
                             onDeleteSubmit={onDeleteSubmit}

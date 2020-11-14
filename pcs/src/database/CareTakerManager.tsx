@@ -6,12 +6,14 @@ export class CareTaker {
   email: string;
   name: string;
   address: string;
+  region: string;
   reg_date: string;
 
-  constructor(email, name, address, reg_date) {
+  constructor(email, name, address, region, reg_date) {
     this.email = email;
     this.name = name;
     this.address = address;
+    this.region = region;
     this.reg_date = reg_date;
   }
 };
@@ -39,8 +41,8 @@ export class Bid {
     this.po_email = po_email;
     this.rating = rating;
     this.review = review;
-    this.start_date = moment(start_date).format("DD-MMM-YYYY");
-    this.end_date = moment(start_date).add(this.number_of_days, "days").format("DD-MMM-YYYY");
+    this.start_date = moment(start_date).format("YYYY-MM-DD");
+    this.end_date = moment(start_date).add(this.number_of_days - 1, "days").format("YYYY-MM-DD");
     this.total_cost = total_cost;
     this.bid_date = bid_date;
   }
@@ -65,13 +67,30 @@ export const bidConverter = {
 
 export async function acceptBid(poEmail: string, petName: string, ctEmail: string, startDate: Date) {
   const status = "Accepted";
-  let result = await callFunction('accept_bid', { poEmail, petName, ctEmail, startDate, status });
-  return JSON.parse(result)[0].accept_bid === 1 ? true : false;
+  let result = await callFunction('update_bid_status', { poEmail, petName, ctEmail, startDate, status });
+  return JSON.parse(result)[0].update_bid_status === 1 ? true : false;
+}
+
+export async function deleteBid(poEmail: string, petName: string, ctEmail: string, startDate: Date) {
+  const status = "Rejected";
+  let result = await callFunction('update_bid_status', { poEmail, petName, ctEmail, startDate, status });
+  return JSON.parse(result)[0].update_bid_status === 1 ? true : false;
+}
+
+export async function confirmBid(poEmail: string, petName: string, ctEmail: string, startDate: Date) {
+  const status = "Confirmed";
+  let result = await callFunction('update_bid_status', { poEmail, petName, ctEmail, startDate, status });
+  return JSON.parse(result)[0].update_bid_status === 1 ? true : false;
 }
 
 export async function getCareTakerAverageRatings(ctEmail: string) {
   let result = await callFunction('get_avg_ratings', { ctEmail });
   return parseFloat(JSON.parse(result)[0].get_avg_ratings);
+}
+
+export async function getCareTakerAverageRatingsWithCount(ctEmail: string) {
+  let result = await callFunction('get_avg_ratings_count', { ctEmail });
+  return JSON.parse(result)[0];
 }
 
 /**
@@ -89,6 +108,12 @@ export async function getCareTaker(email: string) {
   return null;
 }
 
+export async function getCareTakerByEmail(email: string) {
+  let result = await callFunction('get_care_taker', { email });
+  result = JSON.parse(result);
+  return result.length > 0 ? result[0] : null;
+}
+
 export async function getAllPartTimers() {
   let result = await callFunction('get_all_pt_care_takers', []);
   return result.length > 0 ? JSON.parse(result) as CareTaker[] : null;
@@ -102,10 +127,11 @@ export async function getAllFullTimers() {
 export async function getBidsOfCareTaker(email: string) {
   let result = await callFunction('get_bids_by_ctemail', { email });
   // Checking > 2 because it returns a string
-  if (result.length > 2) {
-    return JSON.parse(result);
+  if (result && result.length > 0) {
+    const arr = JSON.parse(result).map(x => bidConverter.fromDB(x));
+    return arr;
   }
-  return null;
+  return [];
 }
 
 export async function getBidsOfCareTakerStatus(email: string, status: string) {
@@ -137,37 +163,24 @@ export async function signUpAsPtCareTaker(email: string, name: string) {
   return result.length > 0 ? result[0][funcName] : null;
 }
 
-export async function deletePartTimer(obj) {
-  // delete obj['index'];
-  // delete obj['name'];
-  // delete obj['address'];
-  // delete obj['reg_date'];
-  // const funcName = 'delete_pcs_user';
-  // let result = await callFunction(funcName, obj);
-  // result = JSON.parse(result);
-  // return result.length > 0 ? result[0][funcName] : null;
-  console.log("not done");
-  // need to find a way to delete pcs_user when the user does not have any role anymore
-  return false;
-}
-
-export async function deleteFullTimer(obj) {
-  // delete obj['index'];
-  // delete obj['name'];
-  // delete obj['address'];
-  // delete obj['reg_date'];
-  // const funcName = 'delete_pcs_user';
-  // let result = await callFunction(funcName, obj);
-  // result = JSON.parse(result);
-  // return result.length > 0 ? result[0][funcName] : null;
-  console.log("not done");
-  // need to find a way to delete pcs_user when the user does not have any role anymore
-  return false;
+export async function deleteCareTaker(obj) {
+  const funcName = 'delete_care_taker';
+  let result = await callFunction(funcName, { email: obj.email });
+  console.log(result);
+  result = JSON.parse(result);
+  return result.length > 0 ? result[0][funcName] : null;
 }
 
 export async function getReviews(ctemail) {
   const result = await callFunction('get_reviews_by_ctemail', { ctemail });
   return result.length > 0 ? JSON.parse(result) as any[] : [];
+}
+
+export async function isStarPerformer(ctemail) {
+  const funcName = 'get_star_performer';
+  let result = await callFunction(funcName, { ctemail });
+  result = JSON.parse(result);
+  return result[0][funcName] === 1;
 }
 
 export class PetCategory {
@@ -221,12 +234,10 @@ export async function getKindsOfPets(email: string) {
 
 export async function optToggle(email: string, category: string, type: boolean, daily_price: number) {
   if (type) { // opt in
-    console.log("a");
     let result = await callFunction('insert_kind_of_pets', { email, category, daily_price });
     result = JSON.parse(result);
     return result.length > 0 ? result[0]["insert_kind_of_pets"] : null;
   } else { // opt out
-    console.log("b");
     let result = await callFunction('delete_kind_of_pet', { email, category });
     result = JSON.parse(result);
     return result.length > 0 ? result[0]["delete_kind_of_pet"] : null;

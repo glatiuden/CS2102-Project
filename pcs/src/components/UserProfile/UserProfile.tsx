@@ -1,13 +1,12 @@
-import clsx from 'clsx';
-import { copyFileSync } from 'fs';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import {
-    Box, Button, Card, CardContent, CardHeader, Container, Divider, FormControl, Grid, NativeSelect, TextField
+    Box, Button, Card, CardContent, CardHeader, Container, Divider, FormControl, Grid, NativeSelect,
+    TextField
 } from '@material-ui/core';
 
 import { AppContext } from '../../contexts/AppContext';
-import { updateUserPassword } from '../../database/PCSUserManager';
+import { updateUserPassword, updateUserCard, getUserCard } from '../../database/PCSUserManager';
 import { getRegions } from './UserProfileHelper';
 import { useStyles } from './UserProfileStyle';
 
@@ -15,10 +14,11 @@ const UserProfile = ({ className, ...rest }) => {
     const classes = useStyles();
     const { user, notifySuccess, notifyDanger, updateUserReducer } = useContext(AppContext);
     const [updateInfo, setUpdateInfo] = useState({
-        uesr_email: user?.email,
-        new_name: user?.name,
-        new_region: user?.region,
-        new_address: user?.address
+        email: user ?.email,
+        name: user ?.name,
+        region: user ?.region,
+        address: user ?.address,
+        user_role: user?.user_role,
     });
     const [updating, setUpdating] = useState(false);
     const [updatePassword, setUpdatePassword] = useState({
@@ -29,6 +29,17 @@ const UserProfile = ({ className, ...rest }) => {
     });
     const [pwNotMatch, setPwNotMatch] = useState(false);
     const [regions, setRegions] = useState<any>([]);
+    const [cardInfo, setCardInfo] = useState({
+        email: user!.email,
+        cardName: '',
+        cardNum: '',
+        expiryDate: '',
+        ccv: ''
+    });
+    const [userCard, setUserCard] = useState<any>({
+        credit_card: ''
+    });
+    const [hasCard, setHasCard] = useState(false);
 
     const onDetailChange = (key: string) => (e: any) => {
         const _updateInfo = { ...updateInfo } as any;
@@ -64,9 +75,9 @@ const UserProfile = ({ className, ...rest }) => {
 
     const onProfileSubmit = () => {
         var changesMade = false;
-        if (user!.name !== updateInfo!.new_name) changesMade = true;
-        if (user!.address !== updateInfo!.new_address) changesMade = true;
-        if (user!.region !== updateInfo!.new_region) changesMade = true;
+        if (user!.name !== updateInfo!.name) changesMade = true;
+        if (user!.address !== updateInfo!.address) changesMade = true;
+        if (user!.region !== updateInfo!.region) changesMade = true;
 
         if (changesMade) {
             setUpdating(true);
@@ -95,22 +106,72 @@ const UserProfile = ({ className, ...rest }) => {
         }
     }
 
+    const onCardChange = (key: string) => (e: any) => {
+        const _cardInfo = { ...cardInfo } as any;
+        _cardInfo[key] = e.target.value;
+        setCardInfo(_cardInfo);
+    }
+
+    const onCreditCardSubmit = async (e:any) => {
+        setUpdating(true);
+        const result = await updateUserCard(cardInfo);
+        setUpdating(false);
+        if(result){
+            notifySuccess("Card Added!");
+            setHasCard(true);
+            setUserCard({
+                credit_card: cardInfo.cardNum
+            });
+        }else{
+            notifyDanger("Some error occured! Please try again later!");
+        }
+    }
+
+    const onChangeCardClicked = () => {
+        setHasCard(false);
+    }
+
+    const onDeleteCardClicked = async () =>{
+        setUpdating(true);
+        const result = await updateUserCard({
+            email: user!.email,
+            credit_card: ''
+        });
+        setUpdating(false);
+        if(result){
+            notifySuccess("Card Removed!");
+            setHasCard(false);
+            setUserCard({
+                credit_card: ''
+            });
+        }else{
+            notifyDanger("Some error occured! Please try again later!");
+        }
+    }
+
+    const retrieveUserCard = async () => {
+        getUserCard(user!.email).then((result) => {
+            if(result){
+                if(result['credit_card'] != null && result['credit_card'] != ''){
+                    setUserCard(result);
+                    setHasCard(true);
+                }
+            }
+        })
+    }
+
     useEffect(() => {
         setRegions(getRegions());
+        retrieveUserCard();
     }, [])
 
     return (
         <Container maxWidth="lg">
             <Grid
                 container
-                spacing={3}
+                spacing={1}
             >
-                <Grid
-                    item
-                    lg={6}
-                    md={6}
-                    xs={12}
-                >
+                <Grid item lg={6} md={6} xs={12}>
                     <Card>
                         <CardHeader title="User Profile" />
 
@@ -125,38 +186,39 @@ const UserProfile = ({ className, ...rest }) => {
                                         name="name"
                                         onChange={onDetailChange("name")}
                                         required
-                                        value={updateInfo!.new_name}
+                                        value={updateInfo!.name}
                                         variant="outlined"
                                     />
                                 </Grid>
-                            <Grid item xs={12}>
-                                <FormControl fullWidth>
-                                    <NativeSelect
-                                        className={classes.selectionInput}
-                                        required
-                                        value={updateInfo!.new_region}
-                                        onChange={onDetailChange("region")}
-                                    >
-                                    <option value="">
-                                        Region
-                                    </option>
-                                    {regions.map((c, i) => (<option key={i} value={c.region}>{c.region}</option>))}
-                                    </NativeSelect>
-                                </FormControl>
-                            </Grid>
-                                <Grid item md={12} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        multiline
-                                        rows={5}
-                                        label="Home Address"
-                                        name="homeAdress"
-                                        onChange={onDetailChange("address")}
-                                        required
-                                        value={updateInfo!.new_address}
-                                        variant="outlined"
-                                    />
+                                <Grid item xs={12}>
+                                    <FormControl fullWidth>
+                                        <NativeSelect
+                                            className={classes.selectionInput}
+                                            required
+                                            value={updateInfo!.region}
+                                            onChange={onDetailChange("region")}
+                                        >
+                                            <option value="">
+                                                Region
+                                            </option>
+                                            {regions.map((c, i) => (<option key={i} value={c.region}>{c.region}</option>))}
+                                        </NativeSelect>
+                                    </FormControl>
                                 </Grid>
+                                {user ?.user_role === "ADMIN" ? null :
+                                    <Grid item md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={5}
+                                            label="Home Address"
+                                            name="homeAdress"
+                                            onChange={onDetailChange("address")}
+                                            required
+                                            value={updateInfo!.address}
+                                            variant="outlined"
+                                        />
+                                    </Grid> }
                             </Grid>
                         </CardContent>
 
@@ -172,19 +234,15 @@ const UserProfile = ({ className, ...rest }) => {
                                 color="primary"
                                 onClick={onProfileSubmit}
                                 disabled={updating}
+                                style={{marginLeft:"auto"}}
                             >
                                 Update Profile
-                        </Button>
+                            </Button>
                         </Box>
                     </Card>
                 </Grid>
 
-                <Grid
-                    item
-                    lg={6}
-                    md={6}
-                    xs={12}
-                >
+                <Grid item lg={6} md={6} xs={12}>
                     <Card>
                         <CardHeader title="Change Password" />
 
@@ -247,14 +305,154 @@ const UserProfile = ({ className, ...rest }) => {
                                 color="primary"
                                 onClick={onPasswordSubmit}
                                 disabled={updating}
+                                style={{marginLeft:"auto"}}
                             >
                                 Update Password
-                        </Button>
+                            </Button>
                         </Box>
                     </Card>
                 </Grid>
+
+                <Box width="100%" margin="5px" display={user!.user_role.includes('PO') && !hasCard ? "block":"none"}>
+                    <Grid item lg={6} md={6} xs={12}>
+                        <Card>
+                            <CardHeader title="Credit Card Details" />
+
+                            <Divider />
+
+                            <CardContent>
+                                <Grid container spacing={3} >
+                                    <Grid item md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Card Name"
+                                            name="cardname"
+                                            onChange={onCardChange("cardName")}
+                                            required
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Card Number"
+                                            name="cardNum"
+                                            onChange={onCardChange("cardNum")}
+                                            required
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+
+                                    <Grid item md={8} xs={8}>
+                                        <TextField
+                                            fullWidth
+                                            label="Expiration Date"
+                                            name="expiryDate"
+                                            onChange={onCardChange('expiryDate')}
+                                            required
+                                            placeholder='MM/YY'
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+
+                                    <Grid item md={4} xs={4}>
+                                        <TextField
+                                            fullWidth
+                                            label="CCV"
+                                            name="ccv"
+                                            onChange={onCardChange("ccv")}
+                                            required
+                                            type="password"
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+
+                            <Divider />
+                            
+                            <div style={{padding:'10px'}}>
+                                <Grid container spacing={1} justify="flex-end" direction="row">
+                                    <Grid item>
+                                        <Box display={userCard!.credit_card == '' ? 'none' : 'block'}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => setHasCard(true)}
+                                                disabled={updating}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={onCreditCardSubmit}
+                                            disabled={updating}
+                                        >
+                                            Add Card
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        </Card>
+                    </Grid>
+                </Box>
+
+
+                <Box width="100%" margin="5px" display={user!.user_role.includes('PO') && hasCard ? "block":"none"}>
+                    <Grid item lg={6} md={6} xs={12}>
+                        <Card>
+                            <CardHeader title="Credit Card Details" />
+
+                            <Divider />
+
+                            <CardContent>
+                                <Grid container spacing={3} >
+                                    <Grid item md={12} xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Card Number"
+                                            value={userCard!.credit_card.replace(/[0-9](?=([0-9]{4}))/g, '•')}
+                                            disabled
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+
+                            <Divider />
+
+                            <div style={{padding:'10px'}}>
+                                <Grid container spacing={1} justify="flex-end" direction="row">
+                                    <Grid item>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={onDeleteCardClicked}
+                                            disabled={updating}
+                                        >
+                                            Delete Card
+                                        </Button>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={onChangeCardClicked}
+                                            disabled={updating}
+                                        >
+                                            Change Card
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        </Card>
+                    </Grid>
+                </Box>
             </Grid>
-            </Container>
+        </Container>
     );
 }
 

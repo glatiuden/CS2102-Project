@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-    Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField
+    Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField
 } from '@material-ui/core';
 
 import { AppContext } from '../../contexts/AppContext';
@@ -49,41 +49,48 @@ export default function DialogAvailability(props: any) {
     return (
         <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth={true}>
             <DialogTitle id="form-dialog-title">{isEdit ? "Edit " : "Add New "}Availability</DialogTitle>
-            <DialogContent>
-                <TextField
-                    required
-                    fullWidth
-                    id="date"
-                    label="Start Date"
-                    name="Start Date"
-                    autoFocus
-                    type="date"
-                    onChange={onChange("start_date")}
-                    value={avail.start_date}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
-                <br />
-                <TextField
-                    required
-                    fullWidth
-                    id="date"
-                    label="End Date"
-                    name="End Date"
-                    autoFocus
-                    type="date"
-                    onChange={onChange("end_date")}
-                    value={avail.end_date}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
+            <DialogContent dividers>
+                <Grid container spacing={1}>
+                    <Grid item xs={6}>
+                        <TextField
+                            variant="outlined"
+                            required
+                            fullWidth
+                            id="date"
+                            label="Start Date"
+                            name="Start Date"
+                            autoFocus
+                            type="date"
+                            onChange={onChange("start_date")}
+                            value={avail.start_date}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
+                            variant="outlined"
+                            required
+                            fullWidth
+                            id="date"
+                            label="End Date"
+                            name="End Date"
+                            autoFocus
+                            type="date"
+                            onChange={onChange("end_date")}
+                            value={avail.end_date}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+                </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={closeDialog} color="secondary">
+                <Button onClick={closeDialog} color="secondary" variant="outlined">
                     Cancel</Button>
-                <Button onClick={submitDialog} color="primary">
+                <Button onClick={submitDialog} color="primary" variant="outlined">
                     {isEdit ? "Update" : "Add"}
                 </Button>
             </DialogActions>

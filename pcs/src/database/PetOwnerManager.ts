@@ -1,18 +1,17 @@
-import {
-    callFunction,
-    callProcedure
-} from './DBCaller';
+import { callFunction } from './DBCaller';
 
 export class PetOwner {
     email: string;
     name: string;
     address: string;
+    region: string;
     reg_date: string;
 
-    constructor(email, name, address, reg_date) {
+    constructor(email, name, address, region, reg_date) {
         this.email = email;
         this.name = name;
         this.address = address;
+        this.region = region;
         this.reg_date = reg_date;
     }
 };
@@ -23,17 +22,10 @@ export async function getAllPetOwners() {
 }
 
 export async function deletePetOwner(obj) {
-    // delete obj['index'];
-    // delete obj['name'];
-    // delete obj['address'];
-    // delete obj['reg_date'];
-    // const funcName = 'delete_pcs_user';
-    // let result = await callFunction(funcName, obj);
-    // result = JSON.parse(result);
-    // return result.length > 0 ? result[0][funcName] : null;  
-    console.log("not done");
-    // need to find a way to delete pcs_user when the user does not have any role anymore
-    return false;
+  const funcName = 'delete_pet_owner';
+  let result = await callFunction(funcName, { email: obj.email });
+  result = JSON.parse(result);
+  return result.length > 0 ? result[0][funcName] : null;
 }
 
 // export async function insertAdmin(obj) {

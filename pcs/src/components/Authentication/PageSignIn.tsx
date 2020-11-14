@@ -27,7 +27,7 @@ const PageSignIn = () => {
         signIn(loginCredentials).then((result: any) => {
             setLoading(false);
             if (result) {
-                history.push('/');
+                history.push('/main');
             }
         });
     };
@@ -40,7 +40,7 @@ const PageSignIn = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            history.push('/');
+            history.push('/main');
         }
     }, []);
 

@@ -1,4 +1,4 @@
-import { callFunction } from './DBCaller';
+import { callFunction, crudResultFormatter } from './DBCaller';
 
 export class PTAvailability {
   email: string;
@@ -28,21 +28,18 @@ export async function getPTAvailability(email: string) {
 
 export async function insertPTAvailability(obj) {
     const funcName = 'insert_pt_availability';
-    let result = await callFunction(funcName, obj);
-    result = JSON.parse(result);
-    return result.length > 0 ? result[0][funcName] : null;  
+    const result = await callFunction(funcName, obj);
+    return crudResultFormatter(result, funcName);
 }
 
 export async function updatePTAvailability(obj) {
     const funcName = 'update_pt_availability';
-    let result = await callFunction(funcName, obj);
-    result = JSON.parse(result);
-    return result.length > 0 ? result[0][funcName] : null;  
+    const result = await callFunction(funcName, obj);
+    return crudResultFormatter(result, funcName);
 }
 
 export async function deletePTAvailability(obj) {
     const funcName = 'delete_pt_availability';
-    let result = await callFunction(funcName, obj);
-    result = JSON.parse(result);
-    return result.length > 0 ? result[0][funcName] : null;  
+    const result = await callFunction(funcName, obj);
+    return crudResultFormatter(result, funcName);
 }

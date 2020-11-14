@@ -19,7 +19,7 @@ export function LoginAppBar() {
     const classes = useStyles();
     return <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-            <Typography variant="h6" noWrap>PCS</Typography>
+            <Typography variant="h6" noWrap>Pet Caring Service</Typography>
         </Toolbar>
     </AppBar>;
 }

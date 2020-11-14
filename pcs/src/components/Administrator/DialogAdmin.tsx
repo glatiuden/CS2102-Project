@@ -1,15 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
-    Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, TextField
+    Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField
 } from '@material-ui/core';
 
-import { hasEmptyFields, notifyFailure, notifySuccess, validateEmail } from './AdminHelper';
+import { hasEmptyFields, notifyFailure, validateEmail } from './AdminHelper';
 import { useStyles } from './AdminStyle';
 
 export default function DialogAdmin(props: any) {
     const adminStyle = useStyles();
-    const { dialogType, closeDialog, onAddSubmit, onUpdateSubmit, onDeleteSubmit, selectedAdminInfo } = props;
+    const { dialogType, closeDialog, onAddSubmit, onDeleteSubmit, selectedAdminInfo } = props;
     const [adminInfo, setAdminInfo] = useState({
         email: '',
         name: '',
@@ -24,19 +24,19 @@ export default function DialogAdmin(props: any) {
         _adminInfo[key] = e.target.value;
         setAdminInfo(_adminInfo);
 
-        if (key == 'email') {
+        if (key === 'email') {
             if (validateEmail(e.target.value)) {
                 setEmailError(false);
             } else {
                 setEmailError(true);
             }
-        } else if (key == 'password') {
+        } else if (key === 'password') {
             if (e.target.value === adminInfo.confirmPassword) {
                 setPwNotMatch(false);
             } else {
                 setPwNotMatch(true);
             }
-        } else if (key == 'confirmPassword') {
+        } else if (key === 'confirmPassword') {
             if (e.target.value === adminInfo.password) {
                 setPwNotMatch(false);
             } else {
@@ -144,7 +144,7 @@ export default function DialogAdmin(props: any) {
             <Dialog open={dialogType == "Delete"}>
                 <DialogTitle id="form-dialog-title">Delete Confirmation</DialogTitle>
                 <DialogContent dividers>
-                    Are you sure you want to delete this admin named "{selectedAdminInfo ? selectedAdminInfo.name : null}"" ?
+                    Are you sure you want to delete this admin named "{selectedAdminInfo ? selectedAdminInfo.name : null}" ?
                 </DialogContent>
                 <DialogActions>
                     <Button variant="outlined" onClick={clearAndCloseDialog} color="secondary">

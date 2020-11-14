@@ -1,4 +1,4 @@
-import { callFunction } from './DBCaller';
+import { callFunction, crudResultFormatter } from './DBCaller';
 
 export class FTLeaves {
   email: string;
@@ -25,21 +25,19 @@ export async function getFTLeaves(email: string) {
 
 export async function insertFTLeaves(obj) {
     const funcName = 'insert_ft_leaves';
-    let result = await callFunction(funcName, obj);
-    result = JSON.parse(result);
-    return result.length > 0 ? result[0][funcName] : null;  
+    const result = await callFunction(funcName, obj);
+    console.log(result);
+    return crudResultFormatter(result, funcName);
 }
 
 export async function updateFTLeaves(obj) {
     const funcName = 'update_ft_leaves';
-    let result = await callFunction(funcName, obj);
-    result = JSON.parse(result);
-    return result.length > 0 ? result[0][funcName] : null;  
+    const result = await callFunction(funcName, obj);
+    return crudResultFormatter(result, funcName);
 }
 
 export async function deleteFTLeaves(obj) {
     const funcName = 'delete_ft_leaves';
-    let result = await callFunction(funcName, obj);
-    result = JSON.parse(result);
-    return result.length > 0 ? result[0][funcName] : null;  
+    const result = await callFunction(funcName, obj);
+    return crudResultFormatter(result, funcName);
 }

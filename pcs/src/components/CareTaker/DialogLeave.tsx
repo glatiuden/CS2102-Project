@@ -46,8 +46,9 @@ export default function DialogLeave(props: any) {
     return (
         <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth={true}>
             <DialogTitle id="form-dialog-title">{isEdit ? "Edit " : "Add New "}Leave</DialogTitle>
-            <DialogContent>
+            <DialogContent dividers>
                 <TextField
+                    variant="outlined"
                     required
                     fullWidth
                     id="date"
@@ -63,9 +64,9 @@ export default function DialogLeave(props: any) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={closeDialog} color="secondary">
+                <Button onClick={closeDialog} color="secondary" variant="outlined">
                     Cancel</Button>
-                <Button onClick={submitDialog} color="primary">
+                <Button onClick={submitDialog} color="primary" variant="outlined">
                     {isEdit ? "Update" : "Add"}
                 </Button>
             </DialogActions>

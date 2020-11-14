@@ -14,7 +14,9 @@ import { TabContext, TabList, TabPanel } from '@material-ui/lab';
 import { AppContext } from '../../contexts/AppContext';
 import { getPetCategory, PetCategory } from '../../database/PetCategoryManager';
 import { Copyright, LoginAppBar } from './AuthComponents';
-import { hasEmptyFields, notifyFailure, notifySuccess, signUp, validateEmail, getRegions } from './AuthHelper';
+import {
+    getRegions, hasEmptyFields, notifyFailure, notifySuccess, signUp, validateEmail
+} from './AuthHelper';
 import { useStyles } from './AuthStyle';
 
 export default function SignUp() {
@@ -51,7 +53,7 @@ export default function SignUp() {
         _regInfo[key] = e.target.value;
         setRegInfo(_regInfo);
 
-        if (_regInfo.petName == '' && _regInfo.petCategory == '' && _regInfo.petSpecialReq == '') {
+        if (_regInfo.petName === '' && _regInfo.petCategory === '' && _regInfo.petSpecialReq === '') {
             setCheckedPO(false);
         } else {
             setCheckedPO(true);
@@ -59,7 +61,7 @@ export default function SignUp() {
     }
 
     const onCareTakerTypeChange = (type: string) => (e: any) => {
-        if (ctType == type) {
+        if (ctType === type) {
             setCheckedCT(false);
             setCtType("0");
         } else {
@@ -135,9 +137,9 @@ export default function SignUp() {
                             history.push("/signin");
                         }, 2000);
                     } else {
-                        if (result == 0) {
+                        if (result === 0) {
                             notifyFailure("Email already registered");
-                        } else if (result == null) {
+                        } else if (result === null) {
                             notifyFailure("Please fill up either pet owner or care taker");
                         } else {
                             notifyFailure("An unexpected error occured. Please try again later");
@@ -252,8 +254,8 @@ export default function SignUp() {
                                         value={regInfo.region}
                                         onChange={onTextChange("region")}
                                     >
-                                    <option value="">
-                                        Region
+                                        <option value="">
+                                            Region
                                     </option>
                                         {regions.map((c, i) => (<option key={i} value={c.region}>{c.region}</option>))}
                                     </NativeSelect>
@@ -341,7 +343,7 @@ export default function SignUp() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={6}>
                                         <Button
-                                            variant={ctType == "1" ? "contained" : "outlined"}
+                                            variant={ctType === "1" ? "contained" : "outlined"}
                                             color="primary"
                                             fullWidth
                                             onClick={onCareTakerTypeChange("1")}
@@ -351,7 +353,7 @@ export default function SignUp() {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Button
-                                            variant={ctType == "2" ? "contained" : "outlined"}
+                                            variant={ctType === "2" ? "contained" : "outlined"}
                                             color="secondary"
                                             fullWidth
                                             onClick={onCareTakerTypeChange("2")}
@@ -361,11 +363,11 @@ export default function SignUp() {
                                     </Grid>
                                 </Grid>
                             </TabPanel>
-                            <Typography variant="caption" noWrap>
-                                {checkedPO || checkedCT ? "This is an indicator that you are signing up for " : ''}
+                            <Typography variant="subtitle2" style={{ color: 'black', textAlign: 'center' }} noWrap>
+                                {checkedPO || checkedCT ? "This is an indicator that you are signing up as a " : ''}
                                 {checkedPO ? "Pet Owner " : ''}
                                 {checkedPO && checkedCT ? "and " : ''}
-                                {checkedCT ? "Care Taker" : ''}
+                                {checkedCT ? "Caretaker" : ''}
                                 <br />
                             </Typography>
                         </TabContext>

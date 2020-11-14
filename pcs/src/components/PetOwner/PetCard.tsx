@@ -6,6 +6,7 @@ import {
 
 import { MainContext } from '../../contexts/MainContext';
 import { useStyles } from './PetOwnerStyle';
+import { getPPByCategory } from './ProfileImageHelper';
 
 const PetCard = (props) => {
     const { pet, onClick } = props;
@@ -17,7 +18,7 @@ const PetCard = (props) => {
             <CardActionArea onClick={() => onClick(pet)}>
                 <Container className={mainStyle.center}>
                     <div>
-                        <Avatar alt={pet.name} src={'https://www.businesstimes.com.sg/sites/default/files/styles/large_popup/public/image/2020/01/11/BT_20200111_PG1BRUNCHREVISE_4002715-1.jpg?itok=KVXsWuAL'} className={mainStyle.largeAvatar} />
+                        <Avatar alt={pet.name} src={getPPByCategory(pet.category)} className={mainStyle.largeAvatar} />
                     </div>
                     <CardContent>
                         <Typography variant="caption">

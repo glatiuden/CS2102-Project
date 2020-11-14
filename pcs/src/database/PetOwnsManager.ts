@@ -15,16 +15,44 @@ export class PetOwns {
   }
 };
 
-export async function searchCareTakerByCategory(startDate, endDate, category) {
-  const funcName = 'search_care_takers_with_category';
-  let result = await callFunction(funcName, {startDate, endDate, category});
+export async function searchCareTakerByCategory(startDate, endDate, category, poEmail, petName) {
+  const funcName = 'search_care_takers_with_category_test';
+  let result = await callFunction(funcName, {startDate, endDate, category, poEmail, petName});
+  console.log(result);
   result = JSON.parse(result);
   return result.length > 0 ? result : null;  
 }
 
-export async function insertBid(po: PetOwns, ct: CareTaker, startDate, endDate, payment) {
+export async function searchCareTakerByAll(startDate, endDate, poEmail) {
+  const funcName = 'search_care_takers_all_category';
+  let result = await callFunction(funcName, {startDate, endDate, poEmail});
+  console.log(result);
+  result = JSON.parse(result);
+  return result.length > 0 ? result : null;  
+}
+
+export async function insertBid(po: PetOwns, ct: CareTaker, startDate, endDate, transfer, payment) {
   const funcName = 'insert_bid';
-  let obj = {po_email: po.po_email, name: po.name, ct_email: ct.email, startDate, endDate, payment}
+  let obj = {po_email: po.po_email, name: po.name, ct_email: ct.email, startDate, endDate, transfer, payment}
+  let result = await callFunction(funcName, obj);
+  console.log(result);
+  result = JSON.parse(result);
+  return result.length > 0 ? result : null;  
+}
+
+export async function updateReview(bid) {
+  const funcName = 'update_bid_rating_and_review';
+  let obj = {pe: bid.po_email, pn: bid.pet_name, ce: bid.ct_email, sd: bid.start_date, rating: bid.rating, review: bid.review}
+  let result = await callFunction(funcName, obj);
+  console.log(result);
+  let rs = JSON.parse(result);
+  console.log(rs);
+  return rs.length > 0 && rs[0].update_bid_rating_and_review > 0 ? result : null;  
+}
+
+export async function deleteBid(bid) {
+  const funcName = 'delete_bid';
+  let obj = {pe: bid.po_email, pn: bid.pet_name, ce: bid.ct_email, sd: bid.start_date}
   let result = await callFunction(funcName, obj);
   console.log(result);
   result = JSON.parse(result);
@@ -34,6 +62,7 @@ export async function insertBid(po: PetOwns, ct: CareTaker, startDate, endDate, 
 export async function getBidsByPetOwns(obj: PetOwns) {
   const funcName = 'get_bids_by_poemail_and_petname';
   let result = await callFunction(funcName, {po_email: obj.po_email, name: obj.name});
+  console.log(result);
   result = JSON.parse(result);
   return result.length > 0 ? result : null;  
 }
@@ -52,7 +81,6 @@ export async function updatePetOwns(obj: PetOwns) {
   return result.length > 0 ? result[0][funcName] : null;  
 }
 
-//Change to function instead of procedure?
 export async function deletePetOwns(obj) {
   const { po_email, name } = obj;
   const args = { po_email, name };

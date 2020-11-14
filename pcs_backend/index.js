@@ -1,5 +1,7 @@
 var express = require('express');
+var cors = require('cors');
 var app = express();
+app.use(cors());
 var bodyParser = require('body-parser');
 var query_model = require('./query_model');
 var createSubscriber = require('pg-listen');
@@ -11,19 +13,38 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+// NOTIFICATION CODE
+let map = new Map();
 const subscriber = createSubscriber(cn);
-subscriber.notifications.on("accepted_channel", (payload) => {
-    console.log("Received notification", payload);
-});
 subscriber.connect();
 subscriber.listenTo("accepted_channel");
+subscriber.notifications.on("accepted_channel", (bid) => {
+    console.log("Received notification", bid);
+
+    if (map.has(bid.po_email)) {
+        map.get(bid.po_email).push(bid.pet_name);
+    } else {
+        map.set(bid.po_email, [bid.pet_name]);
+    }
+});
 
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers');
     next();
 });
+
+app.get("/notification/:poemail", function (req, res) {
+    const po_email = req.params.poemail;
+    let arr = map.get(po_email);
+    if (arr && arr.length > 0) {
+        let petname = arr.pop();
+        let message = `Your bid for ${petname} has been accepted!`
+        res.status(200).send(message);
+    } else {
+        res.status(200).send("none");
+    }
+})
 
 app.post("/procedure/:statement", function (req, res) {
     const statement = req.params.statement;
@@ -33,7 +54,7 @@ app.post("/procedure/:statement", function (req, res) {
         res.status(200).send(response);
     })
         .catch(error => {
-            res.status(500).send(false);
+            res.status(500).send(error);
         })
 });
 
@@ -45,8 +66,7 @@ app.post("/function/:statement", function (req, res) {
         res.status(200).send(response);
     })
         .catch(error => {
-            console.log(error);
-            res.status(500).send(false);
+            res.status(500).send(error.message);
         })
 });
 

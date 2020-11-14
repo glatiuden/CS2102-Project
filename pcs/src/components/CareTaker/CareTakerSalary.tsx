@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 
 import {
-    Avatar, Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle,
-    Divider, Grid, TextField, Typography
+    Avatar, Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent,
+    DialogTitle, Divider, Grid, TextField, Typography
 } from '@material-ui/core';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
+import Rating from '@material-ui/lab/Rating';
 
 import { AppContext } from '../../contexts/AppContext';
 import {
@@ -31,20 +32,22 @@ const CareTakerSalary = () => {
     const [pcRow, setPcRow] = useState<PetCategory>();
     const [petCategorySetPrice, setOpenPetCategorySetPriceDialog] = useState(false);
     const [reviews, setReviews] = useState<any[]>([]);
+    const [newPrice, setPrice] = React.useState(0);
+    const [loading, setLoading] = useState(true);
 
     const onOptToggle = async (row) => {
         let isCT = false;
         if (user) {
             const role = user.user_role;
-            isCT = role.includes("FT") || role.includes("CT");
+            isCT = role.includes("FT") || role.includes("CT") || role.includes("PT");
             const email = user.email;
             if (isCT) {
                 const { category, optin } = row;
                 let toggleSuccess = false;
                 if (optin) {
-                    toggleSuccess = await optToggle(email, category, false, 10); // opting in
+                    toggleSuccess = await optToggle(email, category, false, newPrice); // opting in
                 } else {
-                    toggleSuccess = await optToggle(email, category, true, 10); // opting out
+                    toggleSuccess = await optToggle(email, category, true, newPrice); // opting out
                 }
 
                 if (toggleSuccess) {
@@ -81,19 +84,24 @@ const CareTakerSalary = () => {
 
     const reviewsColumn = [
         {
-            name: 'PO Email',
+            name: 'Pet Owner Email',
             sortable: true,
-            selector: 'po_email'
+            selector: 'po_email',
+            grow: 0.7
         },
         {
             name: 'Rating',
             sortable: true,
-            selector: 'rating'
+            selector: 'rating',
+            cell: (row: any) => <Rating name="read-only" value={row.rating} readOnly />,
+            grow: 0.6
         },
         {
             name: 'Review',
             sortable: false,
-            selector: 'review'
+            selector: 'review',
+            cell: (row: any) => <div>{row.review}</div>,
+            grow: 1.5
         }
     ];
 
@@ -112,7 +120,7 @@ const CareTakerSalary = () => {
                             setLastSalaryReport(lastReport);
                             setSalaryPercentage((report.salary - lastReport.salary) / lastReport.salary);
 
-                            if (lastReport.bonus == 0) {
+                            if (lastReport.bonus === 0) {
                                 setLastBonusZero(true);
                                 setBonusPercentage((report.bonus - lastReport.bonus) / 1);
                             } else {
@@ -125,6 +133,7 @@ const CareTakerSalary = () => {
             });
             getKindsOfPets(user.email).then((result) => {
                 if (result) setPetCategories(result);
+                setLoading(false);
             });
             getReviews(user.email).then((result) => {
                 if (result) setReviews(result);
@@ -132,7 +141,7 @@ const CareTakerSalary = () => {
         }
     }, []);
 
-    return (<>
+    return (loading ? <CircularProgress /> : <>
         <Grid container spacing={2} alignItems="stretch">
             <Grid item xs={2}>
                 <Card style={{ height: '100%' }}>
@@ -196,13 +205,13 @@ const CareTakerSalary = () => {
                             alignItems="center"
                         >
                             {salaryPercentage > 0 ? <ArrowUpwardIcon className={classes.increaseIcon} /> : ''}
-                            {salaryPercentage == 0 ? <DragHandleIcon className={classes.equalIcon} /> : ''}
+                            {salaryPercentage === 0 ? <DragHandleIcon className={classes.equalIcon} /> : ''}
                             {salaryPercentage < 0 ? <ArrowDownwardIcon className={classes.decreaseIcon} /> : ''}
 
                             <Typography
                                 className={
                                     salaryPercentage > 0 ? classes.increaseValue : (
-                                        salaryPercentage == 0 ? classes.equalValue : (
+                                        salaryPercentage === 0 ? classes.equalValue : (
                                             salaryPercentage < 0 ? classes.decreaseValue : ''))
                                 }
                                 variant="body2"
@@ -254,18 +263,19 @@ const CareTakerSalary = () => {
                             alignItems="center"
                         >
                             {bonusPercentage > 0 ? <ArrowUpwardIcon className={classes.increaseIcon} /> : ''}
-                            {bonusPercentage == 0 ? <DragHandleIcon className={classes.equalIcon} /> : ''}
+                            {bonusPercentage === 0 ? <DragHandleIcon className={classes.equalIcon} /> : ''}
                             {bonusPercentage < 0 ? <ArrowDownwardIcon className={classes.decreaseIcon} /> : ''}
                             <Typography
                                 className={
                                     bonusPercentage > 0 ? classes.increaseValue : (
-                                        bonusPercentage == 0 ? classes.equalValue : (
+                                        bonusPercentage === 0 ? classes.equalValue : (
                                             bonusPercentage < 0 ? classes.decreaseValue : ''))
                                 }
                                 variant="body2"
                             >
-                                {lastBonusZero ? '' : Math.round(Math.abs(bonusPercentage * 100)) + '%'}
+                                {lastBonusZero ? '' : !Number.isNaN(bonusPercentage) ? Math.round(Math.abs(bonusPercentage * 100)) + '%' : '0%'}
                             </Typography>
+                            {" "}
                             <Typography
                                 color="textSecondary"
                                 variant="caption"
@@ -278,7 +288,7 @@ const CareTakerSalary = () => {
             </Grid>
             <Grid item xs={6}>
                 {/* Displays all Pet Categories */}
-                <Card style={{ width: "100%" }}>
+                <Card style={{ width: "100%", height: '100%' }}>
                     <CardContent>
                         <Typography
                             color="textSecondary"
@@ -306,7 +316,7 @@ const CareTakerSalary = () => {
             </Grid>
             <Grid item xs={6}>
                 {/* Displays all Pet Categories */}
-                <Card style={{ width: "100%" }}>
+                <Card style={{ width: "100%", height: '100%' }}>
                     <CardContent>
                         <Typography
                             color="textSecondary"
@@ -345,6 +355,7 @@ const CareTakerSalary = () => {
                     name="pcPrice"
                     autoFocus
                     id="pcPrice"
+                    onChange={(e) => setPrice(parseFloat(e.target.value))}
                 />
             </DialogContent>
             <DialogActions>
