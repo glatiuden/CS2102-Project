@@ -11,3 +11,8 @@ Youtube Link: https://youtu.be/rzPsR9x52j0
     - fulltimeronly@pcs.com
     - petowner_parttimer@pcs.com
     - petowner_fulltimer@pcs.com
+
+## Tech Stacks
+- React.js
+- Node.js + Express.js
+- PostgreSQL
